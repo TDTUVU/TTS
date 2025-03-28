@@ -2,7 +2,6 @@ import React, { useState, useEffect, createContext, ReactNode } from 'react';
 import authService from '../services/authService';
 import { User, RegisterData, UserCredentials } from '../types';
 
-// Export interface để có thể import trong file khác
 export interface AuthContextProps {
   user: User | null;
   loading: boolean;
@@ -11,7 +10,6 @@ export interface AuthContextProps {
   logout: () => void;
 }
 
-// Tạo giá trị mặc định
 const defaultContext: AuthContextProps = {
   user: null,
   loading: true,

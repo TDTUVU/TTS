@@ -10,7 +10,6 @@ const api = axios.create({
   }
 });
 
-// Interceptor để thêm token vào header
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     const token = localStorage.getItem('token');
@@ -24,7 +23,6 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor để xử lý lỗi response
 api.interceptors.response.use(
   (response: AxiosResponse): AxiosResponse => response,
   (error: AxiosError): Promise<AxiosError> => {

@@ -41,13 +41,13 @@ const Register: React.FC<RegisterProps> = ({ onClose }) => {
       setLoading(true);
       await register(formData);
       toast.success('Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
-      // Xóa dữ liệu form
+  
       setFormData({
         username: '',
         email: '',
         password: ''
       });
-      // Đóng modal đăng ký nếu đang ở trong modal
+  
       if (onClose) {
         onClose();
       }

@@ -3,7 +3,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './contexts/AuthContext'; 
 
-// Import các component pages
 import Home from './pages/Home';
 import Dashboard from './pages/DashBoard';
 import TasksPage from './pages/TasksPage';
@@ -17,12 +16,10 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      
-      {/* Chuyển hướng các route login/register về trang chủ */}
+  
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/register" element={<Navigate to="/" replace />} />
-      
-      {/* Các route được bảo vệ */}
+  
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tasks" element={<TasksPage />} />

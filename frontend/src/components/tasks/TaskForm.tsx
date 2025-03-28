@@ -4,10 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import taskService from '../../services/taskService';
 import { CreateTaskData } from '../../types';
-// Đã xóa import Task vì không sử dụng
 import { AxiosError } from 'axios';
 
-// Định nghĩa kiểu dữ liệu cho response error
 interface ErrorResponse {
   message?: string;
 }
@@ -26,7 +24,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ isEditing = false }) => {
     status: 'pending'
   });
 
-  // Sử dụng useCallback để fetchTask không thay đổi giữa các lần render
   const fetchTask = useCallback(async (taskId: string) => {
     try {
       setLoading(true);
@@ -37,7 +34,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isEditing = false }) => {
         status: task.status
       });
     } catch (error) {
-      // Sử dụng error để tránh lỗi unused
+   
       console.error("Lỗi khi tải thông tin task:", error);
       toast.error('Không thể tải thông tin công việc');
       navigate('/tasks');
@@ -50,7 +47,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isEditing = false }) => {
     if (isEditing && id) {
       fetchTask(id);
     }
-  }, [isEditing, id, fetchTask]); // Thêm fetchTask vào dependencies
+  }, [isEditing, id, fetchTask]); 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -79,7 +76,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isEditing = false }) => {
       }
       navigate('/tasks');
     } catch (error) {
-      // Sử dụng type assertion với kiểu cụ thể
+   
       const axiosError = error as AxiosError<ErrorResponse>;
       toast.error(axiosError.response?.data?.message || 'Có lỗi xảy ra');
     } finally {

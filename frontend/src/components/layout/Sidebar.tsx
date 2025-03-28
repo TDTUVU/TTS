@@ -2,8 +2,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaHome, FaTasks, FaUser } from 'react-icons/fa';
-// Đã xóa FaChartBar vì không sử dụng
-
 const Sidebar: React.FC = () => {
   const location = useLocation();
   

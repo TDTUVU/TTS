@@ -11,10 +11,10 @@ interface ErrorResponse {
 }
 
 interface LoginProps {
-  onClose?: () => void;  // Thêm interface LoginProps
+  onClose?: () => void;  
 }
 
-const Login: React.FC<LoginProps> = ({ onClose }) => {  // Cập nhật component để nhận prop
+const Login: React.FC<LoginProps> = ({ onClose }) => {  
   const [formData, setFormData] = useState<UserCredentials>({
     email: '',
     password: ''

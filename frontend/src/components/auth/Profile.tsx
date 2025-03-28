@@ -1,8 +1,6 @@
 // src/components/auth/Profile.tsx
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-// Xóa import useAuth vì không sử dụng
-// import { useAuth } from '../../hooks/useAuth';
 import authService from '../../services/authService';
 
 const Profile: React.FC = () => {
