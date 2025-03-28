@@ -1,16 +1,13 @@
-// src/components/layout/Header.tsx
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
-const Header: React.FC = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+interface HeaderProps {
+  onLogoutClick?: () => void;
+}
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+const Header: React.FC<HeaderProps> = ({ onLogoutClick }) => {
+  const { user } = useAuth();
 
   return (
     <header className="bg-white shadow-md">
@@ -30,7 +27,7 @@ const Header: React.FC = () => {
                 Xin chào, <span className="font-semibold">{user.username}</span>
               </div>
               <button 
-                onClick={handleLogout}
+                onClick={onLogoutClick}
                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
               >
                 Đăng xuất

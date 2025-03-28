@@ -1,16 +1,17 @@
-// src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaTasks, FaClipboardList, FaCheck } from 'react-icons/fa';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
+import Modal from '../components/common/Model';
 import taskService from '../services/taskService';
 import { Task } from '../types';
 import { useAuth } from '../hooks/useAuth';
 
 const Dashboard: React.FC = () => {
-  // Sử dụng user để hiển thị thông tin cá nhân nếu cần
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -20,14 +21,18 @@ const Dashboard: React.FC = () => {
     completed: 0
   });
 
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         setLoading(true);
         const data = await taskService.getAllTasks();
         setTasks(data);
-        
-        // Tính toán thống kê
+    
         setStats({
           total: data.length,
           pending: data.filter(task => task.status === 'pending').length,
@@ -54,11 +59,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      <Header />
+      <Header onLogoutClick={() => setShowLogoutModal(true)} />
       
       <main className="flex-grow container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
-          {/* Sử dụng user để hiển thị tên người dùng */}
           {user ? `Dashboard` : 'Dashboard'}
         </h1>
         
@@ -148,6 +152,34 @@ const Dashboard: React.FC = () => {
       </main>
       
       <Footer />
+
+      <Modal isOpen={showLogoutModal} onClose={() => setShowLogoutModal(false)}>
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            Xác nhận đăng xuất
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Bạn có chắc chắn muốn đăng xuất?
+          </p>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={() => setShowLogoutModal(false)}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={() => {
+                handleLogout();
+                setShowLogoutModal(false);
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
