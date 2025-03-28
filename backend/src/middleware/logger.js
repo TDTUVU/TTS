@@ -5,7 +5,6 @@ const logger = async (req, res, next) => {
     const originalSend = res.send;
     const start = Date.now();
     
-    // Ghi lại thông tin request
     const requestInfo = {
         method: req.method,
         endpoint: req.originalUrl,
@@ -15,12 +14,10 @@ const logger = async (req, res, next) => {
         userId: req.userId || null
     };
     
-    // Override phương thức send để ghi lại response
     res.send = function(body) {
         const responseTime = Date.now() - start;
         const responseBody = typeof body === 'string' ? body : JSON.stringify(body);
-        
-        // Tạo log entry
+       
         Log.create({
             userId: requestInfo.userId,
             action: requestInfo.method,
@@ -37,7 +34,7 @@ const logger = async (req, res, next) => {
                 response: {
                     statusCode: res.statusCode,
                     responseTime,
-                    body: responseBody.substring(0, 200) // Lưu 200 ký tự đầu tiên để tránh quá lớn
+                    body: responseBody.substring(0, 200) 
                 }
             }
         }).catch(err => console.error('Lỗi khi ghi log:', err));

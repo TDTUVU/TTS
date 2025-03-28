@@ -7,24 +7,20 @@ const { logger, errorHandler, notFound } = require('./src/middleware');
 
 const app = express();
 
-// Connect Database
 connectDB();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(logger);  // Logger middleware ghi lại tất cả requests
+app.use(logger); 
 
-// Basic route
+
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-// Sử dụng routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Middleware xử lý lỗi
 app.use(notFound);
 app.use(errorHandler);
 

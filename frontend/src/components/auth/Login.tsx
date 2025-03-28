@@ -10,7 +10,11 @@ interface ErrorResponse {
   message?: string;
 }
 
-const Login: React.FC = () => {
+interface LoginProps {
+  onClose?: () => void;  // Thêm interface LoginProps
+}
+
+const Login: React.FC<LoginProps> = ({ onClose }) => {  // Cập nhật component để nhận prop
   const [formData, setFormData] = useState<UserCredentials>({
     email: '',
     password: ''
@@ -39,16 +43,17 @@ const Login: React.FC = () => {
       setLoading(true);
       await login(formData);
       toast.success('Đăng nhập thành công!');
+      if (onClose) {
+        onClose(); // Đóng modal nếu đăng nhập thành công
+      }
       navigate('/dashboard');
     } catch (error) {
       const axiosError = error as AxiosError<ErrorResponse>;
       toast.error(axiosError.response?.data?.message || 'Đăng nhập thất bại');
-      // Xóa dòng navigate('/login') nếu có
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 shadow-xl w-full">

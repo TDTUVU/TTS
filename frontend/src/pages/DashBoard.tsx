@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
       <main className="flex-grow container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
           {/* Sử dụng user để hiển thị tên người dùng */}
-          {user ? `${user.username}'s Dashboard` : 'Dashboard'}
+          {user ? `Dashboard` : 'Dashboard'}
         </h1>
         
         {loading ? (

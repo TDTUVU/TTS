@@ -1,6 +1,6 @@
 const { Task } = require('../models');
 
-// Lấy tất cả task của user
+
 const getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ userId: req.userId });
@@ -10,7 +10,6 @@ const getTasks = async (req, res) => {
   }
 };
 
-// Lấy task theo ID
 const getTaskById = async (req, res) => {
   try {
     const task = await Task.findOne({ 
@@ -28,7 +27,6 @@ const getTaskById = async (req, res) => {
   }
 };
 
-// Tạo task mới
 const createTask = async (req, res) => {
   try {
     const { title, description, status } = req.body;
@@ -46,12 +44,10 @@ const createTask = async (req, res) => {
   }
 };
 
-// Cập nhật task
 const updateTask = async (req, res) => {
   try {
     const { title, description, status } = req.body;
 
-    // Tìm task và đảm bảo nó thuộc về user hiện tại
     const task = await Task.findOne({ 
       _id: req.params.id, 
       userId: req.userId 
@@ -61,7 +57,6 @@ const updateTask = async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy task' });
     }
 
-    // Cập nhật thông tin task
     task.title = title || task.title;
     task.description = description || task.description;
     task.status = status || task.status;
@@ -72,7 +67,6 @@ const updateTask = async (req, res) => {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 };
-
 // Xóa task
 const deleteTask = async (req, res) => {
   try {
@@ -92,7 +86,7 @@ const deleteTask = async (req, res) => {
   }
 };
 
-// Tìm kiếm task
+
 const searchTasks = async (req, res) => {
   try {
     const keyword = req.query.keyword;
