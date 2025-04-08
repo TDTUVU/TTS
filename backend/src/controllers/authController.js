@@ -29,13 +29,39 @@ const register = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    // Xử lý các loại lỗi khác nhau
+    if (error.name === 'ValidationError') {
+      // Lấy thông báo lỗi từ mongoose validation
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ message: messages[0] });
+    }
+    
+    if (error.code === 11000) {
+      // Xử lý lỗi trùng lặp (duplicate key)
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ 
+        message: `${field === 'email' ? 'Email' : 'Username'} đã được sử dụng` 
+      });
+    }
+
+    // Các lỗi khác
+    console.error('Register error:', error);
+    res.status(500).json({ 
+      message: 'Có lỗi xảy ra khi đăng ký, vui lòng thử lại sau',
+      error: error.message 
+    });
   }
 };
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ 
+        message: 'Vui lòng nhập đầy đủ email và mật khẩu' 
+      });
+    }
 
     const user = await User.findOne({ email });
 
@@ -50,7 +76,11 @@ const login = async (req, res) => {
       res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ 
+      message: 'Có lỗi xảy ra khi đăng nhập, vui lòng thử lại sau',
+      error: error.message 
+    });
   }
 };
 
@@ -60,10 +90,14 @@ const getProfile = async (req, res) => {
     if (user) {
       res.json(user);
     } else {
-      res.status(404).json({ message: 'Không tìm thấy người dùng' });
+      res.status(404).json({ message: 'Không tìm thấy thông tin người dùng' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    console.error('Get profile error:', error);
+    res.status(500).json({ 
+      message: 'Có lỗi xảy ra khi tải thông tin người dùng',
+      error: error.message 
+    });
   }
 };
 

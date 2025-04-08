@@ -42,16 +42,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const register = async (userData: RegisterData): Promise<User> => {
-    // Gọi API đăng ký nhưng không tự động đăng nhập
-    const response = await authService.register(userData);
-    // Không set user ở đây
-    return response;
+    try {
+      // Gọi API đăng ký nhưng không tự động đăng nhập
+      const response = await authService.register(userData);
+      // Không set user ở đây
+      return response;
+    } catch (error) {
+      // Log lỗi để debug
+      console.error('Register error in context:', error);
+      // Throw lại lỗi để component xử lý
+      throw error;
+    }
   };
 
   const login = async (credentials: UserCredentials): Promise<User> => {
-    const response = await authService.login(credentials);
-    setUser(response);
-    return response;
+    try {
+      const response = await authService.login(credentials);
+      // Lưu user state khi login thành công
+      setUser(response);
+      return response;
+    } catch (error) {
+      // Log lỗi để debug
+      console.error('Login error in context:', error);
+      // Throw lại lỗi để component xử lý
+      throw error;
+    }
   };
 
   const logout = (): void => {

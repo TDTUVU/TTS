@@ -5,26 +5,28 @@ import { useAuth } from '../../hooks/useAuth';
 import { UserCredentials } from '../../types';
 import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { AxiosError } from 'axios';
-
-interface ErrorResponse {
-  message?: string;
-}
+import { ERROR_MESSAGES } from '../../utils/errorMessages';
 
 interface LoginProps {
-  onClose?: () => void;  
+  onClose?: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onClose }) => {  
+// ... existing code ...
+const Login: React.FC<LoginProps> = ({ onClose }) => {
   const [formData, setFormData] = useState<UserCredentials>({
     email: '',
     password: ''
   });
   const [loading, setLoading] = useState<boolean>(false);
+  // Thêm state để lưu thông báo lỗi
+  const [error, setError] = useState<string>('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
+    // Reset error khi người dùng bắt đầu nhập lại
+    setError('');
     setFormData(prevState => ({
       ...prevState,
       [name]: value
@@ -33,23 +35,54 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    e.stopPropagation();
     
     if (!formData.email || !formData.password) {
-      toast.error('Vui lòng nhập đầy đủ thông tin');
+      setError('Vui lòng nhập đầy đủ thông tin các trường bắt buộc');
       return;
     }
     
     try {
       setLoading(true);
+      setError(''); // Reset error khi bắt đầu submit
       await login(formData);
+      
+      // Nếu đến đây, login đã thành công
       toast.success('Đăng nhập thành công!');
+      
       if (onClose) {
-        onClose(); // Đóng modal nếu đăng nhập thành công
+        onClose();
       }
       navigate('/dashboard');
     } catch (error) {
-      const axiosError = error as AxiosError<ErrorResponse>;
-      toast.error(axiosError.response?.data?.message || 'Đăng nhập thất bại');
+      console.error('Login error:', error);
+      
+      // Reset password
+      setFormData(prev => ({
+        ...prev,
+        password: ''
+      }));
+      
+      // Xử lý và hiển thị lỗi trên form
+      const axiosError = error as AxiosError<any>;
+      const errorData = axiosError.response?.data;
+      
+      if (errorData) {
+        const message = (errorData.message || '').toLowerCase();
+        
+        if (message.includes('invalid') || 
+            message.includes('incorrect') || 
+            message.includes('wrong') || 
+            message.includes('not match')) {
+          setError('Email hoặc mật khẩu không chính xác');
+        } else {
+          setError(message || 'Có lỗi xảy ra, vui lòng thử lại');
+        }
+      } else if (!axiosError.response) {
+        setError('Không thể kết nối đến máy chủ');
+      } else {
+        setError('Có lỗi xảy ra, vui lòng thử lại');
+      }
     } finally {
       setLoading(false);
     }
@@ -58,6 +91,14 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 shadow-xl w-full">
       <h2 className="text-3xl font-semibold text-center text-white mb-8">Login Here</h2>
+      
+      {/* Hiển thị thông báo lỗi */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-100 text-sm">
+          {error}
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-white text-lg mb-2">

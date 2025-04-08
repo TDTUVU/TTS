@@ -4,10 +4,6 @@ import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { AxiosError } from 'axios';
 
-interface ErrorResponse {
-  message?: string;
-}
-
 interface RegisterProps {
   onClose?: () => void;
 }
@@ -19,10 +15,12 @@ const Register: React.FC<RegisterProps> = ({ onClose }) => {
     password: ''
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
   const { register } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
+    setError(''); // Reset error khi người dùng nhập
     setFormData(prevState => ({
       ...prevState,
       [name]: value
@@ -31,15 +29,18 @@ const Register: React.FC<RegisterProps> = ({ onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    e.stopPropagation();
     
     if (!formData.username || !formData.email || !formData.password) {
-      toast.error('Vui lòng nhập đầy đủ thông tin');
+      setError('Vui lòng nhập đầy đủ thông tin các trường bắt buộc');
       return;
     }
-
+  
     try {
       setLoading(true);
+      setError('');
       await register(formData);
+      
       toast.success('Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
   
       setFormData({
@@ -52,16 +53,40 @@ const Register: React.FC<RegisterProps> = ({ onClose }) => {
         onClose();
       }
     } catch (error) {
-      const axiosError = error as AxiosError<ErrorResponse>;
-      toast.error(axiosError.response?.data?.message || 'Đăng ký thất bại');
+      console.error('Register error:', error);
+      
+      setFormData(prev => ({
+        ...prev,
+        password: ''
+      }));
+      
+      const axiosError = error as AxiosError<any>;
+      const errorData = axiosError.response?.data;
+      
+      if (errorData) {
+        // Hiển thị thông báo lỗi trực tiếp từ server
+        setError(errorData.message || 'Có lỗi xảy ra, vui lòng thử lại');
+      } else if (!axiosError.response) {
+        setError('Không thể kết nối đến máy chủ');
+      } else {
+        setError('Có lỗi xảy ra, vui lòng thử lại');
+      }
     } finally {
       setLoading(false);
     }
   };
+  
+  
 
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 shadow-xl w-full">
       <h2 className="text-3xl font-semibold text-center text-white mb-8">Register Here</h2>
+      
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-100 text-sm">
+          {error}
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
