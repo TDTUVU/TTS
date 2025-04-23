@@ -1,16 +1,23 @@
-// src/components/tasks/TaskItem.tsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash, FaCheck } from 'react-icons/fa';
 import { Task } from '../../types';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 interface TaskItemProps {
   task: Task;
   onDelete: (id: string) => Promise<void>;
   onStatusChange: (id: string, status: 'pending' | 'in-progress' | 'completed') => Promise<void>;
+  onTaskNotFound?: () => void; // Thêm prop mới để xử lý khi task không tồn tại
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onDelete, onStatusChange }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ 
+  task, 
+  onDelete, 
+  onStatusChange,
+  onTaskNotFound 
+}) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -18,6 +25,20 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onDelete, onStatusChange }) =
     try {
       setLoading(true);
       await onDelete(task._id);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        toast.error('Công việc này đã bị xóa', {
+          toastId: `delete-not-found-${task._id}`,
+          autoClose: 2000
+        });
+        // Gọi callback để xóa task khỏi UI
+        onTaskNotFound?.();
+      } else {
+        toast.error('Không thể xóa công việc', {
+          toastId: `delete-error-${task._id}`
+        });
+      }
     } finally {
       setLoading(false);
       setConfirmDelete(false);
@@ -28,6 +49,20 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onDelete, onStatusChange }) =
     try {
       setLoading(true);
       await onStatusChange(task._id, status);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        toast.error('Công việc này đã bị xóa', {
+          toastId: `status-not-found-${task._id}`,
+          autoClose: 2000
+        });
+        // Gọi callback để xóa task khỏi UI
+        onTaskNotFound?.();
+      } else {
+        toast.error('Không thể cập nhật trạng thái công việc', {
+          toastId: `status-error-${task._id}`
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -42,26 +77,21 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onDelete, onStatusChange }) =
     }
   };
 
-  const formattedDate = new Date(task.createdAt).toLocaleDateString('vi-VN');
-
   return (
-    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-lg shadow-md p-4 mb-4">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-lg">{task.title}</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title}</h3>
           {task.description && (
-            <p className="text-gray-600 mt-1">{task.description}</p>
+            <p className="text-gray-600 mb-2">{task.description}</p>
           )}
-          <div className="mt-2 flex items-center">
-            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(task.status)}`}>
-              {task.status === 'pending' && 'Chờ xử lý'}
-              {task.status === 'in-progress' && 'Đang thực hiện'}
-              {task.status === 'completed' && 'Hoàn thành'}
-            </span>
-            <span className="text-gray-500 text-sm ml-3">{formattedDate}</span>
-          </div>
+          <span className={`px-2 py-1 rounded-full text-sm ${getStatusColor(task.status)}`}>
+            {task.status === 'pending' && 'Chờ xử lý'}
+            {task.status === 'in-progress' && 'Đang thực hiện'}
+            {task.status === 'completed' && 'Hoàn thành'}
+          </span>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {!confirmDelete ? (
             <>
@@ -85,6 +115,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onDelete, onStatusChange }) =
                 <FaTrash />
                 <span className="sr-only">Xóa</span>
               </button>
+              
               {task.status !== 'completed' && (
                 <button
                   onClick={() => handleStatusChange('completed')}
@@ -105,7 +136,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onDelete, onStatusChange }) =
                 className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
                 disabled={loading}
               >
-                {loading ? 'Đang xóa...' : 'Xác nhận xóa'}
+                {loading ? 'Đang xử lý...' : 'Xác nhận'}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}

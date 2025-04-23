@@ -25,7 +25,7 @@ const AppRoutes = () => {
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/tasks/:id" element={<TaskDetailPage />} />
         <Route path="/tasks/new" element={<TaskFormPage />} />
-        <Route path="/tasks/edit/:id" element={<TaskFormPage />} />
+        <Route path="/tasks/edit/:id" element={<TaskFormPage isEditing={true} />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       
